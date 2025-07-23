@@ -1,0 +1,27 @@
+﻿@model IEnumerable<ImageResizer.Entity.ImageInfo>
+@{
+    ViewData["Title"] = "Home Page";
+}
+
+
+<h1>Image List</h1>
+
+<table>
+    <thead>
+        <tr>
+            <th>File Name</th>
+            <th>Last Modified</th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var image in Model)
+        {
+            <tr>
+                <td>@image.FileName</td>
+                @*<td>@image.LastModified.ToString("yyyy-MM-dd HH:mm:ss")</td>*@
+                <td>@image.LastModified</td>
+            </tr>
+        }
+    </tbody>
+</table>
+
