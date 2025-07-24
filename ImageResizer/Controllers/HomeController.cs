@@ -30,17 +30,27 @@ namespace ImageResizer.Controllers
             // Check if the folder exists
             if (!Directory.Exists(folderPath))
             {
+                Directory.CreateDirectory(folderPath);
                 throw new DirectoryNotFoundException($"Folder not found: {folderPath}");
             }
 
 
             // Get image files and their last modified timestamps
             return Directory.GetFiles(folderPath, "*.jpg")
-                .Select(filePath => new ImageResizer.Entity.ImageInfo
-                {
-                    FileName = Path.GetFileName(filePath),
-                    LastModified = new FileInfo(filePath).LastWriteTime.Ticks
-                })
+                    .Select(filePath =>
+                    {
+                        var relativePath = Path.GetRelativePath(
+                            Path.Combine(Directory.GetCurrentDirectory(), "wwwroot"),
+                            filePath
+                        ).Replace("\\", "/"); // for URL compatibility
+
+                        return new Entity.ImageInfo
+                        {
+                            FileName = Path.GetFileName(filePath),
+                            LastModified = new FileInfo(filePath).LastWriteTime.Ticks,
+                            RelativePath = relativePath
+                        };
+                    })
                 .ToList();
         }
 

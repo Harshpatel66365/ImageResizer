@@ -3,25 +3,81 @@
     ViewData["Title"] = "Home Page";
 }
 
-
 <h1>Image List</h1>
 
-<table>
+<div>
+    <label for="widthSlider">Width: <span id="widthValue">300</span> px</label><br />
+    <input type="range" id="widthSlider" min="50" max="1000" value="300" />
+
+    <br />
+
+    <label for="heightSlider">Height: <span id="heightValue">300</span> px</label><br />
+    <input type="range" id="heightSlider" min="50" max="1000" value="300" />
+</div>
+
+<table border="1" cellpadding="5">
     <thead>
         <tr>
             <th>File Name</th>
             <th>Last Modified</th>
+            <th>Original URL</th>
+            <th>Preview (dynamic)</th>
         </tr>
     </thead>
-    <tbody>
+    <tbody id="imageTableBody">
         @foreach (var image in Model)
         {
-            <tr>
+            var timestamp = image.LastModified;
+            var relativePath = image.RelativePath.Replace("\\", "/");
+            var defaultWidth = 300;
+            var defaultHeight = 300;
+            var resizedUrl = $"/thumb/{timestamp}/{defaultWidth}x{defaultHeight}/{relativePath}";
+
+            <tr data-timestamp="@timestamp" data-relative="@relativePath">
                 <td>@image.FileName</td>
-                @*<td>@image.LastModified.ToString("yyyy-MM-dd HH:mm:ss")</td>*@
                 <td>@image.LastModified</td>
+                <td>
+                    <a href="/@image.RelativePath" target="_blank">View Original</a>
+                </td>
+                <td>
+                    <a class="img-link" href="@resizedUrl" target="_blank">
+                        <img class="preview-img" src="@resizedUrl" alt="@image.FileName" />
+                    </a>
+                </td>
             </tr>
         }
     </tbody>
 </table>
 
+@section Scripts {
+    <script>
+        const widthSlider = document.getElementById("widthSlider");
+        const heightSlider = document.getElementById("heightSlider");
+        const widthValue = document.getElementById("widthValue");
+        const heightValue = document.getElementById("heightValue");
+
+        const updatePreviews = () => {
+            const width = widthSlider.value;
+            const height = heightSlider.value;
+            widthValue.textContent = width;
+            heightValue.textContent = height;
+
+            const rows = document.querySelectorAll("#imageTableBody tr");
+
+            rows.forEach(row => {
+                const timestamp = row.getAttribute("data-timestamp");
+                const relative = row.getAttribute("data-relative");
+
+                const newUrl = `/thumb/${timestamp}/${width}x${height}/${relative}`;
+                const img = row.querySelector(".preview-img");
+                const link = row.querySelector(".img-link");
+
+                img.src = newUrl;
+                link.href = newUrl;
+            });
+        };
+
+        widthSlider.addEventListener("input", updatePreviews);
+        heightSlider.addEventListener("input", updatePreviews);
+    </script>
+}
